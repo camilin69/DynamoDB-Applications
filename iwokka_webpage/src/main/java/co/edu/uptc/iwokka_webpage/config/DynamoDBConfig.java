@@ -5,6 +5,7 @@ import java.net.URI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import co.edu.uptc.iwokka_webpage.model.Client;
 import co.edu.uptc.iwokka_webpage.model.Product;
 import co.edu.uptc.iwokka_webpage.model.Store;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -36,14 +37,13 @@ public class DynamoDBConfig {
     }
 
     @Bean
-    public DynamoDbTable<Store> storeTable(DynamoDbEnhancedClient client) {
-        DynamoDbTable<Store> table = client.table("Stores", TableSchema.fromBean(Store.class));
+    public DynamoDbTable<Store> storeTable() {
+        DynamoDbTable<Store> table = dynamoDbEnhancedClient().table("Stores", TableSchema.fromBean(Store.class));
         
         try {
-            DescribeTableEnhancedResponse describeTableResponse = table.describeTable();
-            System.out.println("Table Stores already exists. It wont be created again.");
+            DescribeTableEnhancedResponse describeTable = table.describeTable();
+            System.out.println("Table Stores already exists. It wont be created again.\nDescribe table for store:" +  describeTable);
         } catch (ResourceNotFoundException e) {
-            // Solo crea la tabla si no existe
             table.createTable(b -> b
                 .provisionedThroughput(p -> p
                     .readCapacityUnits(5L)
@@ -55,14 +55,12 @@ public class DynamoDBConfig {
     }
 
     @Bean
-    public DynamoDbTable<Product> productTable(DynamoDbEnhancedClient client) {
-        DynamoDbTable<Product> table = client.table("Products", TableSchema.fromBean(Product.class));
+    public DynamoDbTable<Product> productTable() {
+        DynamoDbTable<Product> table = dynamoDbEnhancedClient().table("Products", TableSchema.fromBean(Product.class));
 
         try {
             DescribeTableEnhancedResponse describeTable = table.describeTable();
-            System.out.println("Table Stores already exists. It wont be created again.");
-            System.out.println("Describe Table for Products: " + describeTable);
-
+            System.out.println("Table Stores already exists. It wont be created again.\nDescribe Table for Products: " + describeTable);
 
         } catch (ResourceNotFoundException e) {
             table.createTable(b -> b
@@ -71,6 +69,23 @@ public class DynamoDBConfig {
                     .writeCapacityUnits(5L))
             );
             System.out.println("Table Products Created.");
+        }
+        return table;
+    }
+
+    @Bean
+    public DynamoDbTable<Client> clientTable () {
+        DynamoDbTable<Client> table = dynamoDbEnhancedClient().table("Clients", TableSchema.fromBean(Client.class));
+
+        try {
+            DescribeTableEnhancedResponse describeTable = table.describeTable();
+            System.out.println("Table Clients already exists. It wont be created again\nDescribe table for clients: " +  describeTable);
+        } catch (ResourceNotFoundException e) {
+            table.createTable(b -> b
+                .provisionedThroughput(p -> p
+                    .readCapacityUnits(5L)
+                    .writeCapacityUnits(5L)));
+            System.out.println("Table Clients created");
         }
         return table;
     }

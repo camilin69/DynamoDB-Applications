@@ -5,12 +5,8 @@ services:
     image: amazon/dynamodb-local
     container_name: dynamodb-local
     ports:
-      - "9000:8000"  # Mapea el puerto 8000 del contenedor al puerto 9000 del host
-    command: -jar DynamoDBLocal.jar -sharedDb -inMemory  # Usamos modo en memoria para evitar problemas de permisos
-    environment:
-      - AWS_ACCESS_KEY_ID=fake
-      - AWS_SECRET_ACCESS_KEY=fake
-      - AWS_REGION=us-east-1
+      - "8000:8000"  # MApping the port 8000 from container to port 9001 from host
+    command: -jar DynamoDBLocal.jar -sharedDb -inMemory  # Using memory mode to avoid problems with permissions
     networks:
       - my-network
 

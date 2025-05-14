@@ -5,8 +5,10 @@ services:
     image: amazon/dynamodb-local
     container_name: dynamodb-local
     ports:
-      - "8000:8000"  # MApping the port 8000 from container to port 9001 from host
-    command: -jar DynamoDBLocal.jar -sharedDb -inMemory  # Using memory mode to avoid problems with permissions
+      - "9000:8000"  # MApping the port 8000 from container to port 9001 from host
+    command: -jar DynamoDBLocal.jar -sharedDb /home/dynamodblocal/data
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data  
     networks:
       - my-network
 
@@ -29,3 +31,7 @@ services:
 networks:
   my-network:
     driver: bridge
+
+volumes:
+  dynamodb-data:
+    driver: local

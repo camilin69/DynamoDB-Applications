@@ -3,8 +3,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import co.edu.uptc.iwokka_webpage.config.DynamoDBConfig;
 import co.edu.uptc.iwokka_webpage.model.Product;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -13,8 +13,8 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 public class ProductRepository {
     private final DynamoDbTable<Product> productTable;
 
-    public ProductRepository(DynamoDbEnhancedClient dynamoClient) {
-        this.productTable = dynamoClient.table("Products", TableSchema.fromBean(Product.class));
+    public ProductRepository() {
+        this.productTable = DynamoDBConfig.dynamoDbEnhancedClient().table("Products", TableSchema.fromBean(Product.class));
     }
 
     public Product save(Product product) {

@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import co.edu.uptc.iwokka_webpage.config.DynamoDBConfig;
 import co.edu.uptc.iwokka_webpage.model.Store;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -14,8 +14,8 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 public class StoreRepository {
     private final DynamoDbTable<Store> storeTable;
 
-    public StoreRepository(DynamoDbEnhancedClient dynamoClient) {
-        this.storeTable = dynamoClient.table("Stores", TableSchema.fromBean(Store.class));
+    public StoreRepository() {
+        this.storeTable = DynamoDBConfig.dynamoDbEnhancedClient().table("Stores", TableSchema.fromBean(Store.class));
     }
 
     public Store save(Store store) {

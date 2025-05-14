@@ -2,6 +2,7 @@ package co.edu.uptc.iwokka_webpage.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,29 +17,30 @@ import co.edu.uptc.iwokka_webpage.service.ClientService;
 @RestController
 @RequestMapping("/api/clients")
 public class ClientController {
+    @Autowired
     private final ClientService clientService;
 
-    public ClientController(ClientService clientService) {
-        this.clientService = clientService;
+    public ClientController() {
+        this.clientService = new ClientService();
     }
 
-    @PostMapping
-    public Client createClient(@RequestBody Client client) {
-        return clientService.createClient(client);
+    @PostMapping("/save")
+    public Client save(@RequestBody Client client) {
+        return clientService.save(client);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/findById")
     public Client getClient(@PathVariable String id) {
-        return clientService.getClientById(id);
+        return clientService.fingById(id);
     }
 
-    @GetMapping
+    @GetMapping("/findAll")
     public List<Client> getAllClients() {
-        return clientService.getAllClients();
+        return clientService.findAll();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteById")
     public void deleteClient(@PathVariable String id) {
-        clientService.deleteClient(id);
+        clientService.deleteById(id);
     }
 }

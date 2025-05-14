@@ -17,23 +17,32 @@ public class StoreService {
     @Autowired
     private final ProductRepository productRepository;
 
-    public StoreService(StoreRepository storeRepository, ProductRepository productRepository) {
-        this.storeRepository = storeRepository;
-        this.productRepository = productRepository;
+    public StoreService() {
+        this.storeRepository = new StoreRepository();
+        this.productRepository = new ProductRepository();
     }
 
-    public Store createStore(Store store) {
+    public Store save(Store store) {
         return storeRepository.save(store);
     }
 
-    public Store addProductToStore(String category, String label, Product product) {
+    public Store addProduct(String category, String label, Product product) {
         Store store = storeRepository.findByCategoryAndLabel(category, label);
         productRepository.save(product);
         store.getProducts().add(product);
         return storeRepository.save(store);
     }
 
-    public List<Store> getAllStores() {
+    public Store findByCategoryAndLabel(String category, String label) {
+        return storeRepository.findByCategoryAndLabel(category, label);
+    }
+
+    public List<Store> findAll() {
         return storeRepository.findAll();
+    }
+
+    
+    public void delete (String category, String label) {
+        storeRepository.delete(category, label);
     }
 }

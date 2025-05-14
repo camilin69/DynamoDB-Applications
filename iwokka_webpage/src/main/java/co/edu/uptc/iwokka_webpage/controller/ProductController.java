@@ -1,5 +1,9 @@
 package co.edu.uptc.iwokka_webpage.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,19 +17,30 @@ import co.edu.uptc.iwokka_webpage.service.ProductService;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+    @Autowired
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController() {
+        this.productService = new ProductService();
     }
 
-    @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productService.createProduct(product);
+    @PostMapping("/save")
+    public Product save(@RequestBody Product product) {
+        return productService.save(product);
     }
 
-    @GetMapping("/{label}")
-    public Product getProduct(@PathVariable String label) {
-        return productService.getProductByLabel(label);
+    @GetMapping("/findByLabel")
+    public Product findByLabel(@PathVariable String label) {
+        return productService.findByLabel(label);
+    }
+
+    @GetMapping("/findAll") 
+    public List<Product> findAll () {
+        return productService.findAll();
+    }
+
+    @DeleteMapping("/delete")
+    public void delete (@PathVariable String label) {
+        productService.delete(label);
     }
 }

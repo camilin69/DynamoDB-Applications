@@ -1,17 +1,20 @@
 package co.edu.uptc.iwokka_webpage.repository;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
+import co.edu.uptc.iwokka_webpage.config.DynamoDBConfig;
 import co.edu.uptc.iwokka_webpage.model.Client;
-import software.amazon.awssdk.enhanced.dynamodb.*;
-import software.amazon.awssdk.enhanced.dynamodb.model.*;
-import java.util.List;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 @Repository
 public class ClientRepository {
     private final DynamoDbTable<Client> clientTable;
 
-    public ClientRepository(DynamoDbEnhancedClient dynamoClient) {
-        this.clientTable = dynamoClient.table("Clients", TableSchema.fromBean(Client.class));
+    public ClientRepository() {
+        this.clientTable = DynamoDBConfig.dynamoDbEnhancedClient().table("Clients", TableSchema.fromBean(Client.class));
     }
 
     public Client save(Client client) {
@@ -27,7 +30,7 @@ public class ClientRepository {
         return clientTable.scan().items().stream().toList();
     }
 
-    public void delete(String id) {
+    public void deleteById(String id) {
         clientTable.deleteItem(Key.builder().partitionValue(id).build());
     }
 }

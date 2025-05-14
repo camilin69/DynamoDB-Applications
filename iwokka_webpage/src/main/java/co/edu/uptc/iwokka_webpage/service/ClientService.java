@@ -13,23 +13,23 @@ public class ClientService {
     @Autowired
     private final ClientRepository clientRepository;
 
-    public ClientService(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
+    public ClientService() {
+        this.clientRepository = new ClientRepository();
     }
 
-    public Client createClient(Client client) {
+    public Client save(Client client) {
         return clientRepository.save(client);
     }
 
-    public Client getClientById(String id) {
+    public Client fingById(String id) {
         return clientRepository.findById(id);
     }
 
-    public List<Client> getAllClients() {
+    public List<Client> findAll() {
         return clientRepository.findAll();
     }
 
-    public void deleteClient(String id) {
-        clientRepository.delete(id);
+    public void deleteById(String id) {
+        clientRepository.deleteById(id);
     }
 }

@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 public class DynamoDBConfig {
 
     @Bean
-    public DynamoDbClient dynamoDbClient() {
+    public static DynamoDbClient dynamoDbClient() {
         String endpoint = System.getenv("AWS_DYNAMODB_ENDPOINT");
         System.out.println("Connecting to DynamoDB at: " + endpoint);
         
@@ -30,7 +30,7 @@ public class DynamoDBConfig {
     }
 
     @Bean
-    public DynamoDbEnhancedClient dynamoDbEnhancedClient() {
+    public static DynamoDbEnhancedClient dynamoDbEnhancedClient() {
         return DynamoDbEnhancedClient.builder()
             .dynamoDbClient(dynamoDbClient())
             .build();
@@ -42,7 +42,7 @@ public class DynamoDBConfig {
         
         try {
             DescribeTableEnhancedResponse describeTable = table.describeTable();
-            System.out.println("Table Stores already exists. It wont be created again.\nDescribe table for store:" +  describeTable);
+            System.out.println("Table Stores already exists. It wont be created again.\nDescribe table for store:" +  describeTable.toString());
         } catch (ResourceNotFoundException e) {
             table.createTable(b -> b
                 .provisionedThroughput(p -> p
@@ -60,7 +60,7 @@ public class DynamoDBConfig {
 
         try {
             DescribeTableEnhancedResponse describeTable = table.describeTable();
-            System.out.println("Table Stores already exists. It wont be created again.\nDescribe Table for Products: " + describeTable);
+            System.out.println("Table Products already exists. It wont be created again.\nDescribe Table for Products: " + describeTable.toString());
 
         } catch (ResourceNotFoundException e) {
             table.createTable(b -> b
@@ -79,7 +79,7 @@ public class DynamoDBConfig {
 
         try {
             DescribeTableEnhancedResponse describeTable = table.describeTable();
-            System.out.println("Table Clients already exists. It wont be created again\nDescribe table for clients: " +  describeTable);
+            System.out.println("Table Clients already exists. It wont be created again\nDescribe table for clients: " +  describeTable.toString());
         } catch (ResourceNotFoundException e) {
             table.createTable(b -> b
                 .provisionedThroughput(p -> p

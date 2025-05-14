@@ -1,5 +1,7 @@
 package co.edu.uptc.iwokka_webpage.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +13,23 @@ public class ProductService {
     @Autowired
     private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductService() {
+        this.productRepository = new ProductRepository();
     }
 
-    public Product createProduct(Product product) {
+    public Product save(Product product) {
         return productRepository.save(product);
     }
 
-    public Product getProductByLabel(String label) {
+    public Product findByLabel(String label) {
         return productRepository.findByLabel(label);
+    }
+
+    public List<Product> findAll () {
+        return productRepository.findAll();
+    }
+
+    public void delete (String label) {
+        productRepository.delete(label);
     }
 }

@@ -31,8 +31,18 @@ public class ClientController {
     }
 
     @GetMapping("/findById")
-    public Client getClient(@RequestParam String id) {
-        return clientService.fingById(id);
+    public Client findById(@RequestParam String id) {
+        return clientService.findById(id);
+    }
+
+    @GetMapping("/findByEmail")
+    public Client findByEmail(@RequestParam String email) {
+        return clientService.findByEmail(email);
+    }
+
+    @GetMapping("/login")
+    public String login(@RequestParam String email, @RequestParam String password) {
+        return clientService.login(email, password);  
     }
 
     @GetMapping("/findAll")

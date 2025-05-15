@@ -5,6 +5,7 @@ import java.util.List;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
 @DynamoDbBean
 public class Client {
@@ -12,7 +13,7 @@ public class Client {
     private String name;
     private String email;
     private String password;
-    private String rol;
+    private String role;
     private List<Product> products;
 
     public Client () {}
@@ -35,7 +36,7 @@ public class Client {
         this.name = name;
     }
 
-    @DynamoDbAttribute("email")
+    @DynamoDbSecondaryPartitionKey(indexNames = "EmailIndex")
     public String getEmail() {
         return email;
     }
@@ -53,13 +54,13 @@ public class Client {
         this.password = password;
     }
 
-    @DynamoDbAttribute("rol")
-    public String getRol() {
-        return rol;
+    @DynamoDbAttribute("role")
+    public String getRole() {
+        return role;
     }
 
-    public void setRol(String rol) {
-        this.rol = rol;
+    public void setRole(String role) {
+        this.role = role;
     }
 
     @DynamoDbAttribute("products")

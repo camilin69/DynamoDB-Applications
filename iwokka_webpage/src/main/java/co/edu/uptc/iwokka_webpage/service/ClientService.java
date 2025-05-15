@@ -10,6 +10,11 @@ import co.edu.uptc.iwokka_webpage.repository.ClientRepository;
 
 @Service
 public class ClientService {
+    public static final String OK_CLIENT_FOUND = "OK: CLIENT FOUND";
+    public static final String ERROR_CLIENT_NOT_FOUND = "ERROR: CLIENT NOT FOUND";
+    public static final String ERROR_PASSWORD_MISMATCH= "ERROR: PASSWORD MISMATCH FOR EMAIL GIVEN";
+
+
     @Autowired
     private final ClientRepository clientRepository;
 
@@ -21,8 +26,20 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public Client fingById(String id) {
+    public Client findById(String id) {
         return clientRepository.findById(id);
+    }
+
+    public Client findByEmail (String email) {
+        return clientRepository.findByEmail(email);
+    }
+
+    public String login (String email, String password) {
+        Client client = clientRepository.findByEmail(email);
+        if(client != null) {
+            return client.getPassword().equals(password) ? OK_CLIENT_FOUND : ERROR_PASSWORD_MISMATCH;
+        } 
+        return ERROR_CLIENT_NOT_FOUND;
     }
 
     public List<Client> findAll() {

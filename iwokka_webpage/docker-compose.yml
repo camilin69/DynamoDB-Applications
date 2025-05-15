@@ -5,7 +5,7 @@ services:
     image: amazon/dynamodb-local
     container_name: dynamodb-local
     ports:
-      - "9000:8000"  # MApping the port 8000 from container to port 9001 from host
+      - "9001:8000"  # MApping the port 8000 from container to port 9001 from host
     command: -jar DynamoDBLocal.jar -sharedDb /home/dynamodblocal/data
     volumes:
       - dynamodb-data:/home/dynamodblocal/data  

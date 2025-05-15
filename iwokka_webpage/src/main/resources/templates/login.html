@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In to Iwokka</title>
+    <link rel="stylesheet" href="../styles/login.css"/>
+</head>
+    <body>
+        <section id="logInSection">
+            <article>
+                <h1>Log In to Iwokka</h1>
+            </article>
+            <article>
+                <form>
+                    <div>
+                        <label for="emailInputLogIn">Email</label>
+                        <input id="emailInputLogIn" type="text"/>
+                    </div>
+                    <div>
+                        <label for="passwordInputLogIn">Password</label>
+                        <input id="passwordInputLogIn" type="password"/>
+                    </div>
+                    <div>
+                        <label for="roleSelectLogIn">Role</label>
+                        <select id="roleSelectLogIn">
+                            <option disabled selected>Select a role</option>
+                            <option value="client">Client</option>
+                            <option value="owner">Owner</option>
+                        </select>
+                    </div>
+                    <button onclick="logIn()" type="submit">Log In</button>
+                    <a onclick="activeRegister()">Register</a>
+                </form>
+            </article>
+        </section>
+        <section id="registerSection">
+            <article>
+                <h1>Register to Iwokka</h1>
+            </article>
+            <article>
+                <form>
+                    <div>
+                        <label for="idInputRegister">ID</label>
+                        <input id="idInputRegister" type="text"/>
+                    </div>
+                    <div>
+                        <label for="nameInputRegister">Name</label>
+                        <input id="nameInputRegister" type="text"/>
+                    </div>
+                    <div>
+                        <label for="emailInputRegister">Email</label>
+                        <input id="emailInputRegister" type="text"/>
+                    </div>
+                    <div>
+                        <label for="passwordInputRegister">Password</label>
+                        <input id="passwordInputRegister" type="password"/>
+                    </div>
+                    <div>
+                        <label for="roleSelectRegister">Role</label>
+                        <select id="roleSelectRegister">
+                            <option disabled selected>Select a role</option>
+                            <option value="client">Client</option>
+                            <option value="owner">Owner</option>
+                        </select>
+                    </div>
+                    <button onclick="register()" type="submit">Register</button>
+                    <a onclick="activeLogIn()">Log In</a>
+                </form>
+            </article>
+        </section>
+    </body>
+    <script src="../scripts/login.js"></script>
+</html>

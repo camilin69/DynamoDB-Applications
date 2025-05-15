@@ -1,7 +1,5 @@
 package co.edu.uptc.iwokka_webpage.controller;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,17 +9,16 @@ public class PathsController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("serverTime", LocalDateTime.now());
-        return "index"; // Nombre de la plantilla (sin .html)
+        return "login"; 
     }
 
-    @GetMapping("/clientes")
+    @GetMapping("/register")
     public String clientes() {
-        return "clientes"; // clientes.html
+        return "register"; 
     }
 
-    @GetMapping("/tiendas")
+    @GetMapping("/index")
     public String tiendas() {
-        return "tiendas"; // tiendas.html
+        return "index";
     }
 }

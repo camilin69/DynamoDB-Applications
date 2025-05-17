@@ -1,7 +1,5 @@
 package co.edu.uptc.iwokka_webpage.model;
 
-import java.util.List;
-
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -14,7 +12,6 @@ public class Client {
     private String email;
     private String password;
     private String role;
-    private List<Product> products;
 
     public Client () {}
 
@@ -36,7 +33,7 @@ public class Client {
         this.name = name;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "EmailIndex")
+    @DynamoDbSecondaryPartitionKey(indexNames = "email-index")
     public String getEmail() {
         return email;
     }
@@ -63,15 +60,13 @@ public class Client {
         this.role = role;
     }
 
-    @DynamoDbAttribute("products")
-    public List<Product> getProducts() {
-        return products;
+    @Override
+    public String toString() {
+        return "Client [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", role=" + role
+                + "]";
     }
 
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
-
+    
     
     
 }

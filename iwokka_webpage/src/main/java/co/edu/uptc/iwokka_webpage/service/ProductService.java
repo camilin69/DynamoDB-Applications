@@ -1,6 +1,7 @@
 package co.edu.uptc.iwokka_webpage.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,16 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product findByLabel(String label) {
-        return productRepository.findByLabel(label);
+    public List<Product> findAllByLabel(String label) {
+        return productRepository.findAllByLabel(label);
     }
 
     public List<Product> findAll () {
         return productRepository.findAll();
+    }
+
+    public Set<String> findAllUniqueLabels () {
+        return productRepository.findAllUniqueLabels();
     }
 
     public void delete (String label) {

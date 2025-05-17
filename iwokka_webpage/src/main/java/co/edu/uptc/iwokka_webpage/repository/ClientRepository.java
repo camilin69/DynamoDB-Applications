@@ -29,7 +29,7 @@ public class ClientRepository {
     }
 
     public Client findByEmail(String email) {
-    return ((PageIterable<Client>) clientTable.index("EmailIndex")
+    return ((PageIterable<Client>) clientTable.index("email-index")
         .query(r -> r.queryConditional(
             QueryConditional.keyEqualTo(Key.builder().partitionValue(email).build())
         )))

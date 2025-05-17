@@ -1,14 +1,15 @@
 package co.edu.uptc.iwokka_webpage.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.uptc.iwokka_webpage.model.Product;
@@ -29,9 +30,14 @@ public class ProductController {
         return productService.save(product);
     }
 
-    @GetMapping("/findByLabel")
-    public Product findByLabel(@PathVariable String label) {
-        return productService.findByLabel(label);
+    @GetMapping("/findAllUniqueLabels")
+    public Set<String> findAllUniqueLabels () {
+        return productService.findAllUniqueLabels();
+    }
+
+    @GetMapping("/findAllByLabel")
+    public List<Product> findByLabel(@RequestParam String label) {
+        return productService.findAllByLabel(label);
     }
 
     @GetMapping("/findAll") 
@@ -40,7 +46,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete")
-    public void delete (@PathVariable String label) {
+    public void delete (@RequestParam String label) {
         productService.delete(label);
     }
 }

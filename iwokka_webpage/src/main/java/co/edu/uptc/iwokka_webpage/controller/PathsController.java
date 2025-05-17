@@ -12,11 +12,6 @@ public class PathsController {
         return "login"; 
     }
 
-    @GetMapping("/register")
-    public String clientes() {
-        return "register"; 
-    }
-
     @GetMapping("/index")
     public String tiendas() {
         return "index";

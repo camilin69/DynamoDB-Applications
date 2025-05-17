@@ -34,12 +34,12 @@ public class ClientService {
         return clientRepository.findByEmail(email);
     }
 
-    public String login (String email, String password) {
+    public Client login (String email, String password) {
         Client client = clientRepository.findByEmail(email);
         if(client != null) {
-            return client.getPassword().equals(password) ? OK_CLIENT_FOUND : ERROR_PASSWORD_MISMATCH;
+            return client.getPassword().equals(password) ? client : null;
         } 
-        return ERROR_CLIENT_NOT_FOUND;
+        return null;
     }
 
     public List<Client> findAll() {

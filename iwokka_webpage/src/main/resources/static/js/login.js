@@ -7,8 +7,11 @@ function logIn (event) {
     const email = document.getElementById('emailInputLogIn').value;
     const password = document.getElementById('passwordInputLogIn').value;
 
-    fetch(`http://localhost:8080/api/clients/login?email=${email}?password=${password}`, {
-      method : 'POST',
+    const encodedEmail = encodeURIComponent(email);
+    const encodedPassword = encodeURIComponent(password);
+
+    fetch(`http://localhost:8080/api/clients/login?email=${encodedEmail}&password=${encodedPassword}`, {
+      method : 'GET',
       headers: {
             'Content-Type': 'application/json',
       }
@@ -19,8 +22,14 @@ function logIn (event) {
       }
       return response.json();
     })
-    .then(data => {
-      alert(data)
+    .then(user => {
+      if (user) {
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('user', JSON.stringify(user));
+        window.location.href = '/index';
+      }else {
+          alert(ERROR_CLIENT_NOT_FOUND);
+      } 
     })
     .catch(error => {
       console.log('Error Login: ', error)
@@ -47,9 +56,7 @@ function register (event) {
         body: JSON.stringify(clientData),
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('ERROR: SAVING CLIENT');
-        }
+        if (!response.ok) throw new Error('ERROR: SAVING CLIENT')
         return response.json();
     })
     .then(data => {

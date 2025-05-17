@@ -41,7 +41,7 @@ public class ClientController {
     }
 
     @GetMapping("/login")
-    public String login(@RequestParam String email, @RequestParam String password) {
+    public Client login(@RequestParam String email, @RequestParam String password) {
         return clientService.login(email, password);  
     }
 

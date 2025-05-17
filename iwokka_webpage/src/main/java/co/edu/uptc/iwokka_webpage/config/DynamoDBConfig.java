@@ -13,6 +13,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.DescribeTableEnhancedResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 
@@ -20,17 +21,19 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 public class DynamoDBConfig {
 
     @Bean
-    public static DynamoDbClient dynamoDbClient() {
+    public static DynamoDbClient dynamoDbClient() {        
         String endpoint = System.getenv("AWS_DYNAMODB_ENDPOINT");
         System.out.println("Connecting to DynamoDB at: " + endpoint);
         
         return DynamoDbClient.builder()
-            .endpointOverride(URI.create(endpoint))
+            .endpointOverride(URI.create("http://localhost:9001"))
             .build();
     }
 
     @Bean
     public static DynamoDbEnhancedClient dynamoDbEnhancedClient() {
+        System.setProperty("spring.devtools.restart.enabled", "false");
+
         return DynamoDbEnhancedClient.builder()
             .dynamoDbClient(dynamoDbClient())
             .build();
@@ -48,6 +51,12 @@ public class DynamoDBConfig {
                 .provisionedThroughput(p -> p
                     .readCapacityUnits(5L)
                     .writeCapacityUnits(5L))
+                .globalSecondaryIndices(gsi -> gsi
+                    .indexName("category-index")
+                .provisionedThroughput(p -> p
+                        .readCapacityUnits(5L)
+                        .writeCapacityUnits(5L))
+                .projection(p -> p.projectionType(ProjectionType.ALL)))
             );
             System.out.println("Table Stores Created.");
         }
@@ -74,18 +83,29 @@ public class DynamoDBConfig {
     }
 
     @Bean
-    public DynamoDbTable<Client> clientTable () {
+    public DynamoDbTable<Client> clientTable() {
         DynamoDbTable<Client> table = dynamoDbEnhancedClient().table("Clients", TableSchema.fromBean(Client.class));
-
+        
         try {
             DescribeTableEnhancedResponse describeTable = table.describeTable();
-            System.out.println("Table Clients already exists. It wont be created again\nDescribe table for clients: " +  describeTable.toString());
+            System.out.println("Table Clients already exists. It wont be created again\nDescribe table for clients: " + describeTable.toString());
+            
+            // Verificar si el índice existe
+            boolean indexExists = describeTable.table().globalSecondaryIndexes().stream()
+                .anyMatch(gsi -> gsi.indexName().equals("EmailIndex"));
+            System.out.println("IndexExists: " + indexExists);
         } catch (ResourceNotFoundException e) {
             table.createTable(b -> b
                 .provisionedThroughput(p -> p
                     .readCapacityUnits(5L)
-                    .writeCapacityUnits(5L)));
-            System.out.println("Table Clients created");
+                    .writeCapacityUnits(5L))
+                .globalSecondaryIndices(gsi -> gsi
+                    .indexName("email-index")
+                    .provisionedThroughput(p -> p
+                        .readCapacityUnits(5L)
+                        .writeCapacityUnits(5L))
+                    .projection(p -> p.projectionType(ProjectionType.ALL))));
+            System.out.println("Table Clients created.");
         }
         return table;
     }

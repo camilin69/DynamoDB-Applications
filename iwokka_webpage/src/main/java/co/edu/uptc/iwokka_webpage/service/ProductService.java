@@ -34,7 +34,11 @@ public class ProductService {
         return productRepository.findAllUniqueLabels();
     }
 
-    public void delete (String label) {
-        productRepository.delete(label);
+    public Product updateProduct(String oldLabel, String oldName, Product newProduct) {
+        return productRepository.updateProduct(oldLabel, oldName, newProduct);
+    }
+
+    public void delete (String label, String name) {
+        productRepository.delete(label, name);
     }
 }

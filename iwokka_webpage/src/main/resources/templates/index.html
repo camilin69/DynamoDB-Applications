@@ -98,8 +98,41 @@
                 </tbody>
               </table>
             </div>
+            
             <div class="modal-footer">
-                <div id="product-section-save" style="width: 1000px;">
+                <div id="product-section-edit" style="width: 45%; display: none;">
+                    <form id="product-form-edit" class="store-form">
+                        <div class="form-group">
+                            <label for="label-product-edit" class="form-label">Label</label>
+                            <input id="label-product-edit" type="text" class="form-input" placeholder="Enter label"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="name-product-edit" class="form-label">Name</label>
+                            <input id="name-product-edit" type="text" class="form-input" placeholder="Enter name"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="description-product-edit" class="form-label">Description</label>
+                            <textarea 
+                                id="description-product-edit" 
+                                class="form-input"
+                                rows="4"
+                                placeholder="Enter description"
+                                style="resize: vertical; min-height: 100px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="price-product-edit" class="form-label">Price</label>
+                            <input id="price-product-edit" 
+                                type="number"
+                                class="form-input" 
+                                placeholder="Enter price"
+                                step="0.01"
+                                min="0"
+                                pattern="^\d+(\.\d{1,2})?$">
+                        </div>
+                        <button type="submit" class="submit-btn">Edit Product</button>
+                    </form>
+                </div>
+                <div id="product-section-save" style="width: 45%; display: none;">
                     <form onsubmit="saveProduct(event)" class="store-form">
                         <div class="form-group">
                             <label for="label-product-register" class="form-label">Label</label>
@@ -131,7 +164,7 @@
                         <button type="submit" class="submit-btn">Save Product</button>
                     </form>
                 </div>
-                <button type="button" id="save-product-btn" class="btn btn-primary" style="display: none;">
+                <button type="button" id="save-product-btn" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Product
                 </button>
             </div>

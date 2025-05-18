@@ -52,14 +52,20 @@ public class StoreController {
         return storeService.updateProducts(category, label, product);
     }
 
-    @PutMapping("/updateClients")
-    public void updateClients(
-        @RequestParam String category,
-        @RequestParam String label,
-        @RequestBody Client client
-    ) {
-        storeService.updateClients(category, label, client);
+    @PutMapping("/updateOneProduct")
+    public Store updateOneProduct(@RequestParam String category, @RequestParam  String label, 
+        @RequestParam String oldProductLabel, @RequestParam String oldProductName, @RequestBody Product newProduct) {
+        return storeService.updateOneProduct(category, label, oldProductLabel, oldProductName, newProduct);
     }
+
+    // @PutMapping("/updateClients")
+    // public void updateClients(
+    //     @RequestParam String category,
+    //     @RequestParam String label,
+    //     @RequestBody Client client
+    // ) {
+    //     storeService.updateClients(category, label, client);
+    // }
 
     @GetMapping("/findByCategoryAndLabel")
     public Store findByCategoryAndLabel(@RequestParam String category, @RequestParam String label) {
@@ -84,5 +90,10 @@ public class StoreController {
     @DeleteMapping("/delete")
     public boolean delete (@RequestParam String category, @RequestParam String label) {
         return storeService.delete(category, label);
+    }
+
+    @DeleteMapping("/deleteOneProduct")
+    public Store deleteOneProduct(@RequestParam String category ,@RequestParam String label, @RequestParam String productLabel, @RequestParam String productName) {
+        return storeService.deleteOneProduct(category, label, productLabel, productName);
     }
 }

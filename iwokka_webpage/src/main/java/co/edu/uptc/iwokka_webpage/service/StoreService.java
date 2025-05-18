@@ -56,22 +56,26 @@ public class StoreService {
         }
     }
 
-    public void updateClients(String category, String label, Client client) {
-        Store store = storeRepository.findByCategoryAndLabel(category, label);
+    // public void updateClients(String category, String label, Client client) {
+    //     Store store = storeRepository.findByCategoryAndLabel(category, label);
         
-        boolean clientExists = false;
-        if (store.getClients() != null) {
-            clientExists = store.getClients().stream()
-                .anyMatch(c -> c.getId().equals(client.getId())); 
-        }
+    //     boolean clientExists = false;
+    //     if (store.getClients() != null) {
+    //         clientExists = store.getClients().stream()
+    //             .anyMatch(c -> c.getId().equals(client.getId())); 
+    //     }
         
-        if (!clientExists) {
-            storeRepository.updateClients(category, label, client);
-        } else {
-            throw new IllegalArgumentException("Client with ID '" + client.getId() + 
-                                           "' or email '" + client.getEmail() + 
-                                           "' already exists in the store");
-        }
+    //     if (!clientExists) {
+    //         storeRepository.updateClients(category, label, client);
+    //     } else {
+    //         throw new IllegalArgumentException("Client with ID '" + client.getId() + 
+    //                                        "' or email '" + client.getEmail() + 
+    //                                        "' already exists in the store");
+    //     }
+    // }
+
+    public Store updateOneProduct (String category, String label, String olProductLabel, String oldProductName, Product newProduct) {
+        return storeRepository.updateOneProduct(category, label, olProductLabel, oldProductName, newProduct);
     }
 
     public Store findByCategoryAndLabel(String category, String label) {
@@ -90,8 +94,11 @@ public class StoreService {
         return storeRepository.findAll();
     }
 
-    
     public boolean delete (String category, String label) {
         return storeRepository.delete(category, label);
+    }
+
+    public Store deleteOneProduct(String category, String label, String productLabel, String productName) {
+        return storeRepository.deleteOneProduct(category, label, productLabel, productName);
     }
 }

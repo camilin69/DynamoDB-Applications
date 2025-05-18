@@ -13,7 +13,6 @@ public class Store {
     private String category;
     private String Label;
     private List<Product> products;
-    private List<Client> clients;
 
     public Store() {}
 
@@ -44,16 +43,5 @@ public class Store {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
-
-    @DynamoDbAttribute("clients")
-    public List<Client> getClients() {
-        return clients;
-    }
-
-    public void setClients(List<Client> clients) {
-        this.clients = clients;
-    }
-
-    
 
 }

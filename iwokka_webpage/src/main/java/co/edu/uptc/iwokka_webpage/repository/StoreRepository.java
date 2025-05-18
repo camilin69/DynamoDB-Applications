@@ -32,10 +32,12 @@ import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 public class StoreRepository {
     private final DynamoDbTable<Store> storeTable;
     private final DynamoDbIndex<Store> categoryIndex;
+    private final ProductRepository productRepository;
 
     public StoreRepository() {
         this.storeTable = DynamoDBConfig.dynamoDbEnhancedClient().table("Stores", TableSchema.fromBean(Store.class));
         this.categoryIndex = storeTable.index("category-index");
+        productRepository = new ProductRepository();
     }
 
     public Store save(Store store) {
@@ -97,7 +99,7 @@ public class StoreRepository {
         newStore.setCategory(newCategory);
         newStore.setLabel(newLabel);
         newStore.setProducts(store.getProducts());
-        newStore.setClients(store.getClients());
+        //newStore.setClients(store.getClients());
         
         save(newStore);
         
@@ -106,6 +108,7 @@ public class StoreRepository {
         return newStore;
     }
 
+    //NEVER USED
     public void updateClients(String category, String label, Client client) {
 
         DynamoDbClient dynamoDbClient = DynamoDBConfig.dynamoDbClient();
@@ -160,6 +163,7 @@ public class StoreRepository {
     }
     
 
+    //Adds a product
     public Store updateProducts(String category, String label, Product product) {
 
         DynamoDbClient dynamoDbClient = DynamoDBConfig.dynamoDbClient();
@@ -212,15 +216,140 @@ public class StoreRepository {
         }
     }
 
+    //Update an specific product
+    public Store updateOneProduct(String category, String label, String oldProductLabel, String oldProductName, Product newProduct) {
+        DynamoDbClient dynamoDbClient = DynamoDBConfig.dynamoDbClient();
+        
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("category", AttributeValue.builder().s(category).build());
+        key.put("label", AttributeValue.builder().s(label).build());
+
+        Map<String, AttributeValue> newProductMap = new HashMap<>();
+        newProductMap.put("label", AttributeValue.builder().s(newProduct.getLabel()).build());
+        newProductMap.put("name", AttributeValue.builder().s(newProduct.getName()).build());
+        newProductMap.put("description", AttributeValue.builder().s(newProduct.getDescription()).build());
+        newProductMap.put("price", AttributeValue.builder().s(String.valueOf(newProduct.getPrice())).build());
+
+        
+        Store store = findByCategoryAndLabel(category, label);
+        if (store == null) {
+            throw new IllegalArgumentException("Store not found");
+        }
+        
+        int productIndex = -1;
+        List<Product> products = store.getProducts() != null ? store.getProducts() : new ArrayList<>();
+        for (int i = 0; i < products.size(); i++) {
+            Product p = products.get(i);
+            if (p.getLabel().equals(oldProductLabel) && p.getName().equals(oldProductName)) {
+                productIndex = i;
+                break;
+            }
+        }
+        
+        if (productIndex == -1) {
+            throw new IllegalArgumentException("Product not found in store");
+        }
+
+        String updateExpression = "SET products[" + productIndex + "] = :newProduct";
+
+        Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+        expressionAttributeValues.put(":newProduct", AttributeValue.builder().m(newProductMap).build());
+
+        UpdateItemRequest request = UpdateItemRequest.builder()
+                .tableName("Stores")
+                .key(key)
+                .updateExpression(updateExpression)
+                .expressionAttributeValues(expressionAttributeValues)
+                .returnValues("ALL_NEW")
+                .build();
+
+        try {
+            dynamoDbClient.updateItem(request);
+            System.out.println("Product updated atomically in Store " + category + " - " + label);
+            return findByCategoryAndLabel(category, label);
+        } catch (ResourceNotFoundException e) {
+            System.err.println("Table does not exist: " + e.getMessage());
+            throw e;
+        } catch (DynamoDbException e) {
+            System.err.println("Error updating product atomically: " + e.getMessage());
+            throw e;
+        }
+    }
+
     public List<Store> findAll() {
         return storeTable.scan().items().stream().toList();
     }
 
     public boolean delete(String category, String label) {
+        Store store = findByCategoryAndLabel(category, label);
+        if (store.getProducts() != null && !store.getProducts().isEmpty()) {
+            for (Product p : store.getProducts()) {
+                try {
+                    productRepository.delete(p.getLabel(), p.getName());
+                } catch (Exception e) {
+                    System.err.println("Error deleting product " + p.getLabel() + ": " + e.getMessage());
+                }
+            }
+        }
         storeTable.deleteItem(Key.builder()
             .partitionValue(category)
             .sortValue(label)
             .build());
         return findByCategoryAndLabel(category, label) == null;
+    }
+
+    public Store deleteOneProduct(String category, String label, String productLabel, String productName) {
+        DynamoDbClient dynamoDbClient = DynamoDBConfig.dynamoDbClient();
+        
+        Store store = findByCategoryAndLabel(category, label);
+        if (store == null) {
+            throw new IllegalArgumentException("Store not found");
+        }
+        
+        int productIndex = -1;
+        List<Product> products = store.getProducts() != null ? store.getProducts() : new ArrayList<>();
+        for (int i = 0; i < products.size(); i++) {
+            Product p = products.get(i);
+            if (p.getLabel().equals(productLabel) && p.getName().equals(productName)) {
+                productIndex = i;
+                break;
+            }
+        }
+        
+        if (productIndex == -1) {
+            throw new IllegalArgumentException("Product not found in store");
+        }
+    
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("category", AttributeValue.builder().s(category).build());
+        key.put("label", AttributeValue.builder().s(label).build());
+        
+        String updateExpression = "REMOVE products[" + productIndex + "]";
+        
+        UpdateItemRequest request = UpdateItemRequest.builder()
+                .tableName("Stores")
+                .key(key)
+                .updateExpression(updateExpression)
+                .returnValues("ALL_NEW")
+                .build();
+    
+        try {
+            dynamoDbClient.updateItem(request);
+            System.out.println("Product removed from Store " + category + " - " + label);
+            
+            try {
+                productRepository.delete(productLabel, productName);
+            } catch (Exception e) {
+                System.err.println("Warning: Could not delete from Products table: " + e.getMessage());
+            }
+            
+            return findByCategoryAndLabel(category, label);
+        } catch (ResourceNotFoundException e) {
+            System.err.println("Table does not exist: " + e.getMessage());
+            throw e;
+        } catch (DynamoDbException e) {
+            System.err.println("Error removing product from store: " + e.getMessage());
+            throw e;
+        }
     }
 }

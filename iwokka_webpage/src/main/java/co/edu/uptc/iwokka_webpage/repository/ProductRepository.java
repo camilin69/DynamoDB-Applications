@@ -1,5 +1,4 @@
 package co.edu.uptc.iwokka_webpage.repository;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +8,11 @@ import org.springframework.stereotype.Repository;
 
 import co.edu.uptc.iwokka_webpage.config.DynamoDBConfig;
 import co.edu.uptc.iwokka_webpage.model.Product;
-import co.edu.uptc.iwokka_webpage.model.Store;
-import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
@@ -78,8 +73,65 @@ public class ProductRepository {
         return productTable.scan().items().stream().toList();
     }
 
+    public Product updateProduct(String oldLabel, String oldName, Product newProduct) {
+        try {
+            if (newProduct.getLabel() == null || newProduct.getLabel().isEmpty() ||
+                newProduct.getName() == null || newProduct.getName().isEmpty()) {
+                throw new IllegalArgumentException("Product label and name cannot be null or empty");
+            }
     
-    public void delete(String label) {
-        productTable.deleteItem(Key.builder().partitionValue(label).build());
+            Product existingProduct = productTable.getItem(Key.builder()
+                .partitionValue(oldLabel)
+                .sortValue(oldName)
+                .build());
+            
+            if (existingProduct == null) {
+                throw new IllegalArgumentException("Product not found");
+            }
+    
+            // if keys don't change
+            if (oldLabel.equals(newProduct.getLabel()) && oldName.equals(newProduct.getName())) {
+                if (newProduct.getDescription() != null) {
+                    existingProduct.setDescription(newProduct.getDescription());
+                }
+                if (newProduct.getPrice() >= 0) {
+                    existingProduct.setPrice(newProduct.getPrice());
+                }
+                productTable.updateItem(existingProduct);
+                return existingProduct;
+            }
+            
+            // if keys change delete and update new
+            Product updatedProduct = new Product();
+            updatedProduct.setLabel(newProduct.getLabel());
+            updatedProduct.setName(newProduct.getName());
+            updatedProduct.setDescription(
+                newProduct.getDescription() != null ? 
+                newProduct.getDescription() : existingProduct.getDescription());
+            updatedProduct.setPrice(
+                newProduct.getPrice() >= 0 ? 
+                newProduct.getPrice() : existingProduct.getPrice());
+    
+            // Transaction for atomicity
+            DynamoDBConfig.dynamoDbEnhancedClient().transactWriteItems(builder -> builder
+                .addPutItem(productTable, updatedProduct)
+                .addDeleteItem(productTable, Key.builder()
+                    .partitionValue(oldLabel)
+                    .sortValue(oldName)
+                    .build())
+            );
+            
+            return updatedProduct;
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update product: " + e.getMessage(), e);
+        }
+    }
+    
+    public void delete(String label, String name) {
+        productTable.deleteItem(Key.builder()
+            .partitionValue(label)
+            .sortValue(name)
+            .build());
     }
 }

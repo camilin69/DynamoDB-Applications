@@ -13,7 +13,6 @@ function loadValuesSections() {
     if (storesTab.classList.contains('active-tab')) {
         loadCategoriesFromStores();
         if(getUserRole() === ROLE_ADMIN) {
-            const saveProductButton = document.getElementById('save-product-btn');
 
             if(!document.getElementById('save-store-button')) {
                 const saveStoreButton = document.createElement('button');
@@ -26,10 +25,6 @@ function loadValuesSections() {
                 document.getElementById("stores-section-header").appendChild(saveStoreButton);
             }
             
-            saveProductButton.addEventListener('click', () => {
-                const saveProductSection = document.getElementById('product-section-save');
-                saveProductSection.style.display = saveProductSection.style.display === 'none' ? 'block' : 'none';
-            });
             
         }
 
@@ -82,13 +77,17 @@ function loadStoresByCategory(category) {
         const container = document.getElementById('stores-container');
         container.innerHTML = '';
         const isAdmin = getUserRole() === ROLE_ADMIN;
+        
         stores.forEach(store => {
+            const storeData = JSON.stringify(store)
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;');
             const adminButtons = isAdmin ? `
                 <div class="admin-actions mt-2">
-                    <button id="edit-store-management-button" class="btn btn-sm btn-primary edit-store" data-store='${JSON.stringify(store)}'>
+                    <button id="edit-store-management-button" class="btn btn-sm btn-primary edit-store" data-store='${storeData}'>
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button id="delete-store-button" class="btn btn-sm btn-danger delete-store" data-store='${JSON.stringify(store)}'>
+                    <button id="delete-store-button" class="btn btn-sm btn-danger delete-store" data-store='${storeData}'>
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -105,7 +104,7 @@ function loadStoresByCategory(category) {
                                 <strong>Clients:</strong> ${store.clients?.length || 0}<br>
                                 <strong>Products:</strong> ${store.products?.length || 0}
                             </p>
-                            <button class="btn btn-sm btn-info view-products" data-store='${JSON.stringify(store)}'>
+                            <button class="btn btn-sm btn-info view-products" data-store='${storeData}'>
                                 <i class="fas fa-eye"></i> Products
                             </button>
                             ${adminButtons}
@@ -120,10 +119,10 @@ function loadStoresByCategory(category) {
                                 <strong>Clients:</strong> ${store.clients?.length || 0}<br>
                                 <strong>Products:</strong> ${store.products?.length || 0}
                             </p>
-                            <button id="edit-store-button" class="btn btn-sm btn-info edit-store" data-store='${JSON.stringify(store)}'>
+                            <button id="edit-store-button" class="btn btn-sm btn-info edit-store" data-store='${storeData}'>
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button id="edit-store-cancel-button" class="btn btn-sm btn-info edit-store" data-store='${JSON.stringify(store)}'>
+                            <button id="edit-store-cancel-button" class="btn btn-sm btn-info edit-store" data-store='${storeData}'>
                                 <i class="fas fa-xmark"></i> Cancel
                             </button>
                         </div>
@@ -136,33 +135,33 @@ function loadStoresByCategory(category) {
 
         document.querySelectorAll('.view-products').forEach(button => {
             button.addEventListener('click', (e) => {
-                const store = JSON.parse(e.target.dataset.store);
+                const store = JSON.parse(e.currentTarget.dataset.store.replace(/&quot;/g, '"')); 
                 currentStore = store;
                 showProductsModal(store);
             });
         });
         document.querySelectorAll('#edit-store-management-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const store = JSON.parse(e.target.dataset.store);
+                const store = JSON.parse(e.currentTarget.dataset.store.replace(/&quot;/g, '"')); 
                 console.log(store);
                 editStoreManagement(store);                
             });
         });
         document.querySelectorAll('#edit-store-cancel-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const store = JSON.parse(e.target.dataset.store);
+                const store = JSON.parse(e.currentTarget.dataset.store.replace(/&quot;/g, '"')); 
                 cancelEditStoreManagement(store);                
             });
         });
         document.querySelectorAll('#edit-store-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const store = JSON.parse(e.target.dataset.store);
+                const store = JSON.parse(e.currentTarget.dataset.store.replace(/&quot;/g, '"')); 
                 editStore(store);                
             });
         });
         document.querySelectorAll('#delete-store-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const store = JSON.parse(e.target.dataset.store);
+                const store = JSON.parse(e.currentTarget.dataset.store.replace(/&quot;/g, '"')); 
                 deleteStore(store);               
             });
         });
@@ -184,7 +183,6 @@ function showProductsModal(store) {
     productFormSection.style.display = 'none';
     
     const isAdmin = getUserRole() === ROLE_ADMIN;
-    addProductBtn.style.display = isAdmin ? 'block' : 'none';
     
     if(store.products && store.products.length > 0) {
         store.products.forEach(product => {
@@ -196,12 +194,10 @@ function showProductsModal(store) {
     
     modal.show();
     
-    // Evento para añadir nuevo producto
     if(isAdmin) {
         addProductBtn.addEventListener('click', () => {
-            productFormSection.style.display = 'block';
-            addProductBtn.style.display = 'none';
-            // Resetear formulario
+            const saveProductSection = document.getElementById('product-section-save');
+            saveProductSection.style.display = saveProductSection.style.display === 'none' ? 'block' : 'none';
             document.getElementById('label-product-register').value = '';
             document.getElementById('name-product-register').value = '';
             document.getElementById('description-product-register').value = '';
@@ -213,85 +209,53 @@ function showProductsModal(store) {
 function createProductRow(product, store, isAdmin, tableBody) {
     const row = document.createElement('tr');
     row.dataset.productLabel = product.label;
+
+    const productData = JSON.stringify(product)
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;');
     
-    if(product.editing) {
-        // Edition Mode
-        row.innerHTML = `
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${product.label}" id="edit-label-${product.label}">
-            </td>
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${product.name}" id="edit-name-${product.label}">
-            </td>
-            <td>
-                <textarea class="form-control form-control-sm" id="edit-description-${product.label}" 
-                    rows="2">${product.description}</textarea>
-            </td>
-            <td>
-                <input type="number" step="0.01" class="form-control form-control-sm" 
-                    value="${product.price.toFixed(2)}" id="edit-price-${product.label}">
-            </td>
-            <td>
-                <button class="btn btn-sm btn-success save-edit" data-id="${product.label}">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button class="btn btn-sm btn-secondary cancel-edit" data-id="${product.label}">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </td>
-        `;
-    } else {
-        // Normal visualization
-        row.innerHTML = `
+    row.innerHTML = `
             <td>${product.label}</td>
             <td>${product.name}</td>
             <td>${product.description}</td>
             <td>$${product.price.toFixed(2)}</td>
             <td>
                 ${isAdmin ? `
-                <button class="btn btn-sm btn-warning edit-product" data-id="${product.label}">
+                <button id="edit-product-button" class="btn btn-sm btn-warning edit-product" data-product='${productData}'>
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger delete-product" data-id="${product.label}">
+                <button id="delete-product-button" class="btn btn-sm btn-danger delete-product" data-product='${productData}'>
                     <i class="fas fa-trash"></i>
                 </button>
                 ` : 'No Available'}
             </td>
-        `;
-    }
+    `;
     
     tableBody.appendChild(row);
     
-    if(isAdmin && !product.editing) {
-        // Add events only if is not in edition mode
-        row.querySelector('.edit-product')?.addEventListener('click', () => {
-            product.editing = true;
-            createProductRow(product, store, isAdmin, tableBody);
+    if(isAdmin) {
+        row.querySelector('#edit-product-button')?.addEventListener('click', (event) => {
+            const product = JSON.parse(event.currentTarget.dataset.product.replace(/&quot;/g, '"')); 
+            const productSectionEdit = document.getElementById('product-section-edit');
+            
+            document.getElementById('label-product-edit').value = product.label || '';
+            document.getElementById('name-product-edit').value = product.name || '';
+            document.getElementById('description-product-edit').value = product.description || '';
+            document.getElementById('price-product-edit').value = product.price || '';
+            
+            productSectionEdit.style.display = productSectionEdit.style.display === 'none' ? 'block' : 'none'; 
+            
+            productSectionEdit.dataset.editingProduct = JSON.stringify(product);
+            const form = document.getElementById('product-form-edit');
+            form.removeEventListener('submit', editProduct);
+            form.addEventListener('submit', editProduct);
+
         });
         
-        row.querySelector('.delete-product')?.addEventListener('click', () => {
-            if(confirm(`¿Eliminar producto ${product.label}?`)) {
-                deleteProduct(store.category, store.label, product.label);
-            }
-        });
-    }
-    
-    if(product.editing) {
-        // Add events only if is in edit mode
-        row.querySelector('.save-edit')?.addEventListener('click', () => {
-            const updatedProduct = {
-                label: document.getElementById(`edit-label-${product.label}`).value,
-                name: document.getElementById(`edit-name-${product.label}`).value,
-                description: document.getElementById(`edit-description-${product.label}`).value,
-                price: parseFloat(document.getElementById(`edit-price-${product.label}`).value),
-                originalLabel: product.label // Guardamos el label original para identificar el producto
-            };
-            saveEditedProduct(store.category, store.label, updatedProduct);
-        });
-        
-        row.querySelector('.cancel-edit')?.addEventListener('click', () => {
-            product.editing = false;
-            createProductRow(product, store, isAdmin, tableBody);
+        row.querySelector('#delete-product-button')?.addEventListener('click', (event) => {
+            const product = JSON.parse(event.currentTarget.dataset.product.replace(/&quot;/g, '"')); 
+
+            deleteProduct(product, store);
         });
     }
 }
@@ -408,13 +372,13 @@ function editStore (store) {
             })
             .then(s => {
                 console.log('Store updated to:',s)
+                location.reload();
+
             }).catch(error => {
                 console.log("Error: ", error)
             });
         }
     }
-    cancelEditStoreManagement(store);
-    location.reload();
 }
 
 function deleteStore (store) {
@@ -424,15 +388,15 @@ function deleteStore (store) {
     .then(response => {
         if(!response) throw new Error('Error Updating Store')
         console.log(response.json());
+        loadCategoriesFromStores();
     })
     .catch(error => {
         console.log("Error: ", error)
     });
     
-    location.reload();
 }
 
-function saveProduct (event) {
+function saveProduct (event,) {
     event.preventDefault();
     const newStore = {};
     const productData = {
@@ -486,6 +450,87 @@ function saveProduct (event) {
     });
 }
 
+function editProduct(event) {
+    event.preventDefault();
+    
+    const productSectionEdit = document.getElementById('product-section-edit');
+    const originalProduct = JSON.parse(productSectionEdit.dataset.editingProduct);
+    const newProduct = {
+        label: document.getElementById('label-product-edit').value,
+        name: document.getElementById('name-product-edit').value,
+        description: document.getElementById('description-product-edit').value,
+        price: parseFloat(document.getElementById('price-product-edit').value)
+    };
+
+    //Update One Product in store
+    fetch(`http://localhost:8080/api/stores/updateOneProduct?category=${currentStore.category}&label=${currentStore.label}&oldProductLabel=${originalProduct.label}&oldProductName=${originalProduct.name}`, {
+        method : "PUT",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body : JSON.stringify(newProduct)
+    })
+    .then(response => {
+        if(!response.ok) throw new Erorr('Error editing one product of store.')
+        return response.json();
+    })
+    .then(store => {
+        console.log("Store updated: ", store);
+        currentStore = store;
+        productSectionEdit.style.display = 'none';
+        loadCategoriesFromStores();
+        bootstrap.Modal.getInstance(document.getElementById('productsModal')).hide();
+        showProductsModal(store);
+    })
+    .catch(error => {
+        console.error('Error editing one product of store: ', error);
+    });
+    
+    //Update in products table
+    fetch(`http://localhost:8080/api/products/updateProduct?oldLabel=${originalProduct.label}&oldName=${originalProduct.name}`, {
+        method : "PUT", 
+        headers : {
+            "Content-Type":"application/json"
+        },
+        body : JSON.stringify(newProduct)
+    })
+    .then(response => {
+        if(!response.ok) throw new Erorr('Error updating product in table products.')
+        return response.json();
+    })
+    .then(p => {
+        console.log("Product updated: ", p);
+    })
+    .catch(error => {
+        console.error('Error updating product in table products: ', error);
+    });
+
+    
+}
+
+function deleteProduct (product, store) {
+
+    fetch(`http://localhost:8080/api/stores/deleteOneProduct?category=${store.category}&label=${store.label}&productLabel=${product.label}&productName=${product.name}`, {
+        method : "DELETE"
+    })
+    .then(response => {
+        if(!response) throw new Error("Error deleting one product from store.")
+        return response.json();
+    })
+    .then(s => {
+        console.log(s);
+        currentStore = s;
+        loadCategoriesFromStores();
+        bootstrap.Modal.getInstance(document.getElementById('productsModal')).hide();
+        showProductsModal(s);
+    })
+    .catch(error => {
+        console.error('Error deleting one product from store: ', error);
+    });
+
+}
+
+
 function showSection(sectionId) {
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
@@ -517,14 +562,11 @@ function getUserRole() {
 }
 
 function editStoreManagement (store) {
-    const d = document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`);
     document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`).style.display = 'none';
     document.querySelector(`.store-card-edit-${store.label.replaceAll(" ", "_")}`).style.display = 'block';
 }
 
 function cancelEditStoreManagement (store) {
-    const d = document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`);
-
     document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`).style.display = 'block';
     document.querySelector(`.store-card-edit-${store.label.replaceAll(" ", "_")}`).style.display = 'none';
 }

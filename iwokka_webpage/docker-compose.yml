@@ -5,7 +5,7 @@ services:
     image: amazon/dynamodb-local
     container_name: dynamodb-local
     ports:
-      - "9001:8000"  # MApping the port 8000 from container to port 9001 from host
+      - "9001:8000"  # Mapping the port 8000 from container to port 9001 from host
     command: -jar DynamoDBLocal.jar -sharedDb /home/dynamodblocal/data
     volumes:
       - dynamodb-data:/home/dynamodblocal/data  
@@ -24,7 +24,7 @@ services:
       - AWS_ACCESS_KEY_ID=fake
       - AWS_SECRET_ACCESS_KEY=fake
       - SPRING_PROFILES_ACTIVE=docker
-      - AWS_DYNAMODB_ENDPOINT=http://dynamodb:8000  # Usamos el nombre del servicio y el puerto interno
+      - AWS_DYNAMODB_ENDPOINT=http://dynamodb:8000  
     networks:
       - my-network
 

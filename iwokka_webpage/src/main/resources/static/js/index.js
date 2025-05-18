@@ -3,6 +3,9 @@ let currentStore = {}
 const ROLE_CLIENT = 'client';
 const ROLE_ADMIN = 'admin';
 
+
+
+
 function loadValuesSections() {
     const storesTab = document.getElementById('stores-tab');
     const productsTab = document.getElementById('products-tab');
@@ -82,10 +85,10 @@ function loadStoresByCategory(category) {
         stores.forEach(store => {
             const adminButtons = isAdmin ? `
                 <div class="admin-actions mt-2">
-                    <button class="btn btn-sm btn-primary edit-store" data-id="${store.category}">
+                    <button id="edit-store-management-button" class="btn btn-sm btn-primary edit-store" data-store='${JSON.stringify(store)}'>
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger delete-store" data-id="${store.category}">
+                    <button id="delete-store-button" class="btn btn-sm btn-danger delete-store" data-store='${JSON.stringify(store)}'>
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -93,7 +96,7 @@ function loadStoresByCategory(category) {
             
             const storeCard = `
                 <div class="col-md-4 mb-4">
-                    <div class="card store-card">
+                    <div class="card store-card-${store.label.replaceAll(" ", "_")}">
                         <div class="card-body">
                             <h5 class="card-title">${store.label}</h5>
                             <p class="card-text">
@@ -102,22 +105,65 @@ function loadStoresByCategory(category) {
                                 <strong>Clients:</strong> ${store.clients?.length || 0}<br>
                                 <strong>Products:</strong> ${store.products?.length || 0}
                             </p>
-                            <button class="btn btn-sm btn-info view-products" 
-                                    data-store='${JSON.stringify(store)}'>
-                                <i class="fas fa-eye"></i> Ver Productos
+                            <button class="btn btn-sm btn-info view-products" data-store='${JSON.stringify(store)}'>
+                                <i class="fas fa-eye"></i> Products
                             </button>
                             ${adminButtons}
                         </div>
                     </div>
+                    <div class="card store-card-edit-${store.label.replaceAll(" ", "_")}" style="display: none;">
+                        <div class="card-body">
+                            <h5 class="card-title">${store.label}</h5>
+                            <p class="card-text">
+                                <strong>Category:</strong><input id="category-store-edit" type="text" class="form-input" value="${store.category}"/>
+                                <strong>Label:</strong><input id="label-store-edit" type="text" class="form-input" value="${store.label}"/>
+                                <strong>Clients:</strong> ${store.clients?.length || 0}<br>
+                                <strong>Products:</strong> ${store.products?.length || 0}
+                            </p>
+                            <button id="edit-store-button" class="btn btn-sm btn-info edit-store" data-store='${JSON.stringify(store)}'>
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button id="edit-store-cancel-button" class="btn btn-sm btn-info edit-store" data-store='${JSON.stringify(store)}'>
+                                <i class="fas fa-xmark"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>`;
             container.insertAdjacentHTML('beforeend', storeCard);
+            
         });
+
 
         document.querySelectorAll('.view-products').forEach(button => {
             button.addEventListener('click', (e) => {
                 const store = JSON.parse(e.target.dataset.store);
                 currentStore = store;
                 showProductsModal(store);
+            });
+        });
+        document.querySelectorAll('#edit-store-management-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const store = JSON.parse(e.target.dataset.store);
+                console.log(store);
+                editStoreManagement(store);                
+            });
+        });
+        document.querySelectorAll('#edit-store-cancel-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const store = JSON.parse(e.target.dataset.store);
+                cancelEditStoreManagement(store);                
+            });
+        });
+        document.querySelectorAll('#edit-store-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const store = JSON.parse(e.target.dataset.store);
+                editStore(store);                
+            });
+        });
+        document.querySelectorAll('#delete-store-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const store = JSON.parse(e.target.dataset.store);
+                deleteStore(store);               
             });
         });
     })
@@ -347,6 +393,45 @@ function saveStore (event) {
     
 }
 
+function editStore (store) {
+    if(document.getElementById('category-store-edit') && document.getElementById('label-store-edit')) {
+        if(document.querySelector(`.store-card-edit-${store.label.replaceAll(" ", "_")}`).style.display === 'block'){
+            const newCategory = document.getElementById('category-store-edit').value;
+            const newLabel = document.getElementById('label-store-edit').value;
+
+            fetch(`http://localhost:8080/api/stores/updateStore?oldCategory=${store.category}&oldLabel=${store.label}&newCategory=${newCategory}&newLabel=${newLabel}`, {
+                method : 'PUT'
+            })
+            .then(response => {
+                if(!response) throw new Error('Error Updating Store')
+                return response.json();
+            })
+            .then(s => {
+                console.log('Store updated to:',s)
+            }).catch(error => {
+                console.log("Error: ", error)
+            });
+        }
+    }
+    cancelEditStoreManagement(store);
+    location.reload();
+}
+
+function deleteStore (store) {
+    fetch(`http://localhost:8080/api/stores/delete?category=${store.category}&label=${store.label}`, {
+        method : 'DELETE'
+    })
+    .then(response => {
+        if(!response) throw new Error('Error Updating Store')
+        console.log(response.json());
+    })
+    .catch(error => {
+        console.log("Error: ", error)
+    });
+    
+    location.reload();
+}
+
 function saveProduct (event) {
     event.preventDefault();
     const newStore = {};
@@ -394,6 +479,7 @@ function saveProduct (event) {
         console.log(product);
         loadStoresByCategory(document.getElementById('find-by-categories').value);
         showProductsModal(newStore);
+        location.reload();
     })
     .catch(error => {
         console.error('Error Saving Products: ', error);
@@ -430,6 +516,18 @@ function getUserRole() {
     }
 }
 
+function editStoreManagement (store) {
+    const d = document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`);
+    document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`).style.display = 'none';
+    document.querySelector(`.store-card-edit-${store.label.replaceAll(" ", "_")}`).style.display = 'block';
+}
+
+function cancelEditStoreManagement (store) {
+    const d = document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`);
+
+    document.querySelector(`.store-card-${store.label.replaceAll(" ", "_")}`).style.display = 'block';
+    document.querySelector(`.store-card-edit-${store.label.replaceAll(" ", "_")}`).style.display = 'none';
+}
 function closeSidebar() {
     document.getElementById('store-products-sidebar').style.width = '0';
     document.getElementById('product-stores-sidebar').style.width = '0';

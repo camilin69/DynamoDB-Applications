@@ -28,6 +28,15 @@ public class StoreService {
         return storeRepository.save(store);
     }
 
+    public Store updateStore(
+        String oldCategory,
+        String oldLabel,
+        String newCategory,
+        String newLabel
+    ) {
+        return storeRepository.updateStore(oldCategory, oldLabel, newCategory, newLabel);
+    }
+
     public Store updateProducts(String category, String label, Product product) {
         Store store = storeRepository.findByCategoryAndLabel(category, label);
         boolean productExists = false;
@@ -82,7 +91,7 @@ public class StoreService {
     }
 
     
-    public void delete (String category, String label) {
-        storeRepository.delete(category, label);
+    public boolean delete (String category, String label) {
+        return storeRepository.delete(category, label);
     }
 }

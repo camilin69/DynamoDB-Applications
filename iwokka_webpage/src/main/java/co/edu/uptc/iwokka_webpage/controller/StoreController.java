@@ -33,6 +33,16 @@ public class StoreController {
         return storeService.save(store);
     }
 
+    @PutMapping("/updateStore")
+    public Store updateStore(
+        @RequestParam String oldCategory,
+        @RequestParam String oldLabel,
+        @RequestParam String newCategory,
+        @RequestParam String newLabel
+    ) {
+        return storeService.updateStore(oldCategory, oldLabel, newCategory, newLabel);
+    }
+
     @PutMapping("/updateProducts")
     public Store updateProducts(
         @RequestParam String category,
@@ -72,7 +82,7 @@ public class StoreController {
     }
 
     @DeleteMapping("/delete")
-    public void delete (@RequestParam String category, @RequestParam String label) {
-        storeService.delete(category, label);
+    public boolean delete (@RequestParam String category, @RequestParam String label) {
+        return storeService.delete(category, label);
     }
 }

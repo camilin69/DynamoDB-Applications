@@ -87,6 +87,25 @@ public class StoreRepository {
             .build());
     }
 
+    public Store updateStore(String oldCategory, String oldLabel, String newCategory, String newLabel) {        
+        Store store = findByCategoryAndLabel(oldCategory, oldLabel);
+        if (store == null) {
+            throw new IllegalArgumentException("Store does not exist");
+        }
+        
+        Store newStore = new Store();
+        newStore.setCategory(newCategory);
+        newStore.setLabel(newLabel);
+        newStore.setProducts(store.getProducts());
+        newStore.setClients(store.getClients());
+        
+        save(newStore);
+        
+        delete(oldCategory, oldLabel);
+        
+        return newStore;
+    }
+
     public void updateClients(String category, String label, Client client) {
 
         DynamoDbClient dynamoDbClient = DynamoDBConfig.dynamoDbClient();
@@ -197,10 +216,11 @@ public class StoreRepository {
         return storeTable.scan().items().stream().toList();
     }
 
-    public void delete(String category, String label) {
+    public boolean delete(String category, String label) {
         storeTable.deleteItem(Key.builder()
             .partitionValue(category)
             .sortValue(label)
             .build());
+        return findByCategoryAndLabel(category, label) == null;
     }
 }
